@@ -1,0 +1,3 @@
+name = "resume-builder"
+compatibility_date = "2025-02-19"
+assets = { directory = "dist" }
