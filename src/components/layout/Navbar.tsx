@@ -90,7 +90,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Center Controls: Templates & Typography */}
-      <div className="hidden lg:flex items-center gap-2 text-xs">
+      <div className="hidden md:flex items-center gap-2 text-xs">
         {/* Template Selector */}
         <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg p-1">
           <span className="text-slate-400 px-2 text-[11px]">Format:</span>

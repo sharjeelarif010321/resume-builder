@@ -7,8 +7,9 @@ import { ProjectsEditor } from './ProjectsEditor';
 import { SkillsEditor } from './SkillsEditor';
 import { CertificationsEditor } from './CertificationsEditor';
 import { SectionManager } from './SectionManager';
+import { DesignEditor } from './DesignEditor';
 import { 
-  User, Briefcase, GraduationCap, FolderGit2, Wrench, Award, Layers
+  User, Briefcase, GraduationCap, FolderGit2, Wrench, Award, Layers, Palette
 } from 'lucide-react';
 
 interface EditorPaneProps {
@@ -44,13 +45,14 @@ export const EditorPane: React.FC<EditorPaneProps> = ({ resume, onChange }) => {
   };
 
   const tabs = [
-    { id: 'basics', label: 'Contact & Basics', icon: User },
-    { id: 'structure', label: 'Reorder Sections', icon: Layers },
-    { id: 'experience', label: 'Work Experience', icon: Briefcase, count: resume.experience.filter(e => e.visible).length },
+    { id: 'basics', label: 'Contact', icon: User },
+    { id: 'design', label: 'Template & Design', icon: Palette },
+    { id: 'structure', label: 'Sections Order', icon: Layers },
+    { id: 'experience', label: 'Experience', icon: Briefcase, count: resume.experience.filter(e => e.visible).length },
     { id: 'projects', label: 'Projects', icon: FolderGit2, count: resume.projects.filter(p => p.visible).length },
     { id: 'education', label: 'Education', icon: GraduationCap, count: resume.education.filter(e => e.visible).length },
     { id: 'skills', label: 'Skills', icon: Wrench, count: resume.skills.filter(s => s.visible).length },
-    { id: 'certifications', label: 'Certifications', icon: Award, count: resume.certifications.filter(c => c.visible).length },
+    { id: 'certifications', label: 'Certs', icon: Award, count: resume.certifications.filter(c => c.visible).length },
   ];
 
   return (
@@ -91,6 +93,13 @@ export const EditorPane: React.FC<EditorPaneProps> = ({ resume, onChange }) => {
           <BasicsEditor
             basics={resume.basics}
             onChange={(basics) => onChange({ ...resume, basics })}
+          />
+        )}
+
+        {activeTab === 'design' && (
+          <DesignEditor
+            settings={resume.settings}
+            onChange={(settings) => onChange({ ...resume, settings })}
           />
         )}
 

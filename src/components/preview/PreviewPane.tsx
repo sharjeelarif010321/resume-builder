@@ -1,10 +1,10 @@
 import React, { useRef, useState } from 'react';
-import { ResumeData, FontSize, MarginSize } from '../../types/resume';
+import { ResumeData, TemplateId, FontSize, MarginSize } from '../../types/resume';
 import { ClassicTemplate } from './templates/ClassicTemplate';
 import { ModernTemplate } from './templates/ModernTemplate';
 import { CompactTemplate } from './templates/CompactTemplate';
 import { PageBudgetMeter } from './PageBudgetMeter';
-import { ZoomIn, ZoomOut, RotateCcw, Eye } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Eye, Layout } from 'lucide-react';
 
 interface PreviewPaneProps {
   resume: ResumeData;
@@ -18,7 +18,6 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({ resume, onChangeSettin
 
   const { settings } = resume;
 
-  // Margin padding mapping
   const marginPaddingClass =
     settings.marginSize === 'compact' ? 'p-6 sm:p-8' :
     settings.marginSize === 'relaxed' ? 'p-10 sm:p-14' :
@@ -39,11 +38,27 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({ resume, onChangeSettin
   return (
     <div className="flex flex-col h-full bg-slate-950/80">
       {/* Top Preview Control Bar */}
-      <div className="p-3 border-b border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between gap-3 shrink-0">
-        <PageBudgetMeter contentRef={paperRef} />
+      <div className="p-3 border-b border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between gap-2.5 shrink-0">
+        <div className="flex items-center gap-2">
+          <PageBudgetMeter contentRef={paperRef} />
+
+          {/* Quick Template Switcher Dropdown */}
+          <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs">
+            <Layout size={13} className="text-blue-400 mr-1.5 shrink-0" />
+            <select
+              value={settings.template}
+              onChange={(e) => onChangeSettings({ ...settings, template: e.target.value as TemplateId })}
+              className="bg-transparent text-slate-200 text-xs font-medium focus:outline-none cursor-pointer"
+            >
+              <option value="classic">Classic Ivy (LaTeX)</option>
+              <option value="modern">Modern Tech</option>
+              <option value="compact">Compact Exec</option>
+            </select>
+          </div>
+        </div>
 
         {/* View & Density Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {/* Font Size quick-adjust */}
           <div className="hidden sm:flex items-center bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-[11px]">
             <span className="text-slate-500 px-1.5">Size:</span>
@@ -62,7 +77,7 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({ resume, onChangeSettin
           </div>
 
           {/* Margins quick-adjust */}
-          <div className="hidden sm:flex items-center bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-[11px]">
+          <div className="hidden md:flex items-center bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-[11px]">
             <span className="text-slate-500 px-1.5">Margins:</span>
             {(['compact', 'standard', 'relaxed'] as MarginSize[]).map((mg) => (
               <button
@@ -88,7 +103,7 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({ resume, onChangeSettin
             }`}
           >
             <Eye size={12} />
-            <span className="hidden sm:inline">Page Line</span>
+            <span className="hidden lg:inline">Page Line</span>
           </button>
 
           {/* Zoom Buttons */}
@@ -99,7 +114,7 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({ resume, onChangeSettin
               className="p-1 text-slate-300 hover:text-white rounded"
               title="Zoom out"
             >
-              <ZoomOut size={14} />
+              <ZoomOut size={13} />
             </button>
             <span className="px-1.5 font-mono text-[11px] text-slate-300 select-none">
               {Math.round(zoom * 100)}%
@@ -110,7 +125,7 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({ resume, onChangeSettin
               className="p-1 text-slate-300 hover:text-white rounded"
               title="Zoom in"
             >
-              <ZoomIn size={14} />
+              <ZoomIn size={13} />
             </button>
             <button
               type="button"
@@ -118,7 +133,7 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({ resume, onChangeSettin
               className="p-1 text-slate-400 hover:text-white rounded border-l border-slate-700 ml-0.5"
               title="Reset zoom"
             >
-              <RotateCcw size={12} />
+              <RotateCcw size={11} />
             </button>
           </div>
         </div>
