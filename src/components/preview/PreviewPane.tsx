@@ -1,10 +1,10 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { ResumeData, TemplateId, FontSize, MarginSize } from '../../types/resume';
 import { ClassicTemplate } from './templates/ClassicTemplate';
 import { ModernTemplate } from './templates/ModernTemplate';
 import { CompactTemplate } from './templates/CompactTemplate';
 import { PageBudgetMeter } from './PageBudgetMeter';
-import { ZoomIn, ZoomOut, RotateCcw, Eye, Layout } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Eye, Layout, Maximize2 } from 'lucide-react';
 
 interface PreviewPaneProps {
   resume: ResumeData;
@@ -12,9 +12,33 @@ interface PreviewPaneProps {
 }
 
 export const PreviewPane: React.FC<PreviewPaneProps> = ({ resume, onChangeSettings }) => {
-  const [zoom, setZoom] = useState<number>(0.95);
-  const [showPageMarker, setShowPageMarker] = useState<boolean>(true);
   const paperRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showPageMarker, setShowPageMarker] = useState<boolean>(true);
+
+  // Auto-calculate zoom for mobile screens
+  const calculateFitZoom = () => {
+    if (typeof window === 'undefined') return 0.95;
+    const containerWidth = containerRef.current?.clientWidth || window.innerWidth;
+    const availableWidth = containerWidth - 32; // 16px padding on each side
+    if (availableWidth <= 0) return 0.95;
+    const fitZoom = Math.min(1.1, Math.max(0.35, availableWidth / 830));
+    return parseFloat(fitZoom.toFixed(2));
+  };
+
+  const [zoom, setZoom] = useState<number>(0.95);
+
+  // On mount and resize, auto-adjust on mobile/tablets
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 900) {
+        setZoom(calculateFitZoom());
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const { settings } = resume;
 
@@ -38,7 +62,7 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({ resume, onChangeSettin
   return (
     <div className="flex flex-col h-full bg-slate-950/80">
       {/* Top Preview Control Bar */}
-      <div className="p-3 border-b border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between gap-2.5 shrink-0">
+      <div className="p-2.5 sm:p-3 border-b border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between gap-2 shrink-0">
         <div className="flex items-center gap-2">
           <PageBudgetMeter contentRef={paperRef} />
 
@@ -106,11 +130,22 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({ resume, onChangeSettin
             <span className="hidden lg:inline">Page Line</span>
           </button>
 
+          {/* Fit to Width Button (Mobile friendly) */}
+          <button
+            type="button"
+            onClick={() => setZoom(calculateFitZoom())}
+            className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+            title="Fit resume to screen width"
+          >
+            <Maximize2 size={12} />
+            <span className="hidden sm:inline">Fit</span>
+          </button>
+
           {/* Zoom Buttons */}
           <div className="flex items-center bg-slate-800 border border-slate-700/80 rounded-lg p-0.5 text-xs">
             <button
               type="button"
-              onClick={() => setZoom(Math.max(0.6, zoom - 0.1))}
+              onClick={() => setZoom(Math.max(0.3, parseFloat((zoom - 0.1).toFixed(2))))}
               className="p-1 text-slate-300 hover:text-white rounded"
               title="Zoom out"
             >
@@ -121,7 +156,7 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({ resume, onChangeSettin
             </span>
             <button
               type="button"
-              onClick={() => setZoom(Math.min(1.4, zoom + 0.1))}
+              onClick={() => setZoom(Math.min(1.5, parseFloat((zoom + 0.1).toFixed(2))))}
               className="p-1 text-slate-300 hover:text-white rounded"
               title="Zoom in"
             >
@@ -131,7 +166,7 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({ resume, onChangeSettin
               type="button"
               onClick={() => setZoom(0.95)}
               className="p-1 text-slate-400 hover:text-white rounded border-l border-slate-700 ml-0.5"
-              title="Reset zoom"
+              title="Reset 100%"
             >
               <RotateCcw size={11} />
             </button>
@@ -140,31 +175,50 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({ resume, onChangeSettin
       </div>
 
       {/* Main Preview Scroll Area */}
-      <div className="flex-1 overflow-auto p-4 sm:p-8 flex justify-center items-start">
+      <div
+        ref={containerRef}
+        className="flex-1 overflow-auto p-3 sm:p-6 flex justify-center items-start"
+      >
+        {/* Scaled Wrapper Box: prevents overflow dead-space on mobile */}
         <div
-          style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }}
-          className="transition-transform duration-100 ease-out"
+          style={{
+            width: `${816 * zoom}px`,
+            minHeight: `${1056 * zoom}px`,
+            position: 'relative',
+          }}
+          className="transition-all duration-150 ease-out"
         >
-          {/* Printable US Letter Paper Simulation (8.5in x 11in) */}
           <div
-            id="printable-resume"
-            ref={paperRef}
-            className={`relative bg-white text-black shadow-2xl rounded-sm w-[816px] min-h-[1056px] box-border ${marginPaddingClass}`}
+            style={{
+              transform: `scale(${zoom})`,
+              transformOrigin: 'top left',
+              width: '816px',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+            }}
           >
-            {/* 1-Page Cutoff Line Overlay (Hidden in print) */}
-            {showPageMarker && (
-              <div
-                className="absolute left-0 right-0 border-b-2 border-dashed border-rose-500/70 pointer-events-none print:hidden z-20 flex justify-end pr-2"
-                style={{ top: '1056px' }}
-              >
-                <span className="text-[10px] bg-rose-600 text-white font-mono px-1.5 py-0.5 rounded-b font-medium shadow-sm">
-                  1-PAGE CUTOFF (Page 2 Begins Below)
-                </span>
-              </div>
-            )}
+            {/* Printable US Letter Paper Simulation (8.5in x 11in) */}
+            <div
+              id="printable-resume"
+              ref={paperRef}
+              className={`relative bg-white text-black shadow-2xl rounded-sm w-[816px] min-h-[1056px] box-border ${marginPaddingClass}`}
+            >
+              {/* 1-Page Cutoff Line Overlay (Hidden in print) */}
+              {showPageMarker && (
+                <div
+                  className="absolute left-0 right-0 border-b-2 border-dashed border-rose-500/70 pointer-events-none print:hidden z-20 flex justify-end pr-2"
+                  style={{ top: '1056px' }}
+                >
+                  <span className="text-[10px] bg-rose-600 text-white font-mono px-1.5 py-0.5 rounded-b font-medium shadow-sm">
+                    1-PAGE CUTOFF (Page 2 Begins Below)
+                  </span>
+                </div>
+              )}
 
-            {/* Template Content */}
-            {renderTemplate()}
+              {/* Template Content */}
+              {renderTemplate()}
+            </div>
           </div>
         </div>
       </div>

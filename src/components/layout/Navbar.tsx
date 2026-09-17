@@ -81,11 +81,11 @@ export const Navbar: React.FC<NavbarProps> = ({
         <button
           type="button"
           onClick={onOpenAudit}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all hover:scale-105 cursor-pointer ml-1 sm:ml-3 ${scoreBadgeColor}`}
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all hover:scale-105 cursor-pointer ml-1 sm:ml-3 shrink-0 ${scoreBadgeColor}`}
           title="Click to view ATS recommendations & redline feedback"
         >
           <Gauge size={13} />
-          <span>Score: {overallScore}/100</span>
+          <span><span className="hidden sm:inline">Score: </span>{overallScore}/100</span>
         </button>
       </div>
 
